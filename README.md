@@ -15,8 +15,9 @@ To try this package your default-frame-alist needs these entries:
    (tab-bar-lines . 1)       ; space will be overlaid by the MBTB frame
 ```
 
-You also need to enable a vaccuous version of tab-mode enable:
+You also need to enable a vaccuous version of tab-bar-mode enable:
 ```
-  (tab-bar-format . (lambda () ""))
-  (tab-bar-mode . t)
+  (setq tab-bar-format '((lambda () " ")))
+
+  (tab-bar-mode  +1)
 ```

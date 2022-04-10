@@ -34,6 +34,14 @@
 ;;;
 ;;;    (minibuffer . nil)        ; supress minibuffer at bottom of frame
 ;;;    (tab-bar-lines . 1)       ; space will be overlaid by the MBTB frame
+;;;
+;;; You also need to enable a vaccuous version of tab-bar-mode enable:
+;;;
+;;;    (setq tab-bar-format '((lambda () " ")))
+;;;
+;;;    (tab-bar-mode  +1)
+```
+
 
 ;;; Code:
 
