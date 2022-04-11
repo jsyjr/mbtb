@@ -45,20 +45,6 @@
 
 ;;; Code:
 
-(defgroup mbtb nil
-  "Mbtb is proof-of-concept for a minibuffer positioned over the menu-bar."
-  :prefix "mbtb"
-  :group 'minibuffer)
-
-(defcustom mbtb-debounce-delay 0.02
-  "Seconds to wait before declaring a frame focus change debounced."
-  :type 'float)
-
-(defun mbtb-resize-mbf (mbf)
-  "MBTB callback for the resize-mini-frames option."
-  (let ((width (frame-text-width mbf)))
-    (fit-frame-to-buffer-1 mbf nil 1 width width 'vertically)))
-
 (with-eval-after-load 'mbtb     ; configure emacs options
   (custom-set-variables
    '(minibuffer-frame-alist     ; unspecified items from default-frame-alist
@@ -75,6 +61,10 @@
        (undecorated . t)
        (desktop-dont-save . t)))
    '(resize-mini-frames #'mbtb-resize-mbf)))
+
+(defun mbtb-resize-mbf (mbf)
+  "MBTB callback for the resize-mini-frames option."
+  (fit-frame-to-buffer-1 mbf nil 1 nil nil 'vertically))
 
 (defun mbtb-mbf (owner)
   "Qualify OWNER by returning its dedicated separate MBF or nil."
@@ -97,23 +87,10 @@
       (unless (eq (frame-parameter mbf 'width) width)
 	(set-frame-parameter mbf 'width  width)))))
 
-(defun mbtb-track-owner-width (owner)
-  "Qualify OWNER and adjust its separate MBF's width."
-  (let ((mbf (mbtb-mbf owner)))
-    (when mbf
-      (mbtb-apply-owner-width owner mbf))))
-;; (add-hook 'window-size-change-functions #'mbtb-track-owner-width)
-
-(defun mbtb-setup-colors-and-width (owner mbf)
-  "Given OWNER and MBF, ensure proper MBF color, position and width."
-  (set-face-background 'fringe          "black" mbf)
-  (set-face-background 'internal-border "white" mbf)
-  (mbtb-apply-owner-width owner mbf))
-
 (defun mbtb-setup-minibuffer ()
-  "Invoke mbtb-setup-colors-and-width with owner and mbf."
+  "Invoke mbtb-apply-owner-width with owner and mbf."
   (let ((owner (window-frame (minibuffer-selected-window))))
-    (mbtb-setup-colors-and-width owner (mbtb-mbf owner))))
+    (mbtb-apply-owner-width owner (mbtb-mbf owner))))
 (add-hook 'minibuffer-setup-hook #'mbtb-setup-minibuffer)
 
 (defun mbtb-after-make-frame (owner)
@@ -123,46 +100,11 @@
       (set-frame-parameter mbf 'parent-frame owner)
       (set-frame-position mbf 0 0)
       (mbtb-resize-mbf mbf)
-      (mbtb-setup-colors-and-width owner mbf)
+      (mbtb-apply-owner-width owner mbf)
+      (set-face-background 'fringe          "black" mbf)
+      (set-face-background 'internal-border "white" mbf)
       (set-frame-parameter mbf 'visibility t))))
 (add-hook 'after-make-frame-functions #'mbtb-after-make-frame)
-
-(defun mbtb-refresh-owner-mbf-stacking-order (owner)
-  "Refresh an MBF's stacking based oon whether it or its OWNER has focus."
-  (let ((mbf (mbtb-mbf owner)))
-    (when mbf
-      (frame-restack mbf owner t))
-      (when (frame-focus-state owner)
-        (with-current-buffer (window-buffer (frame-root-window mbf))
-          (delete-region (minibuffer-prompt-end) (point-max)))
-        (mbtb-resize-mbf mbf))))
-
-(defvar mbtb-focus-events-timer nil
-  "When non-nil a debounce timer is running.")
-
-(defvar mbtb-last-focus-state 'force-update
-  "Most recent ‘frame-focus-state’ from a focus change event.")
-
-(defun mbtb-focus-change ()
-  "On actual focus change refresh all owner / mbf stacking orders."
-  (setq mbtb-focus-events-timer nil)
-  (let ((state (with-no-warnings (frame-focus-state))))
-    (unless (eq mbtb-last-focus-state state)
-      (setq mbtb-last-focus-state state)
-      (dolist (frame (frame-list))
-        (mbtb-refresh-owner-mbf-stacking-order frame)))))
-
-;; This debouncing logic was inspired by
-;; https://www.reddit.com/r/emacs/comments/kxsgtn/ignore_spurious_focus_events_for
-
-(defun mbtb-debounce-focus-change ()
-  "Drain spurious events by canceling a running timer and setup a new one."
-  (if (timerp mbtb-focus-events-timer)
-      (cancel-timer mbtb-focus-events-timer))
-  (setq mbtb-focus-events-timer
-        (run-with-timer mbtb-debounce-delay nil #'mbtb-focus-change)))
-(add-function :after after-focus-change-function #'mbtb-debounce-focus-change)
-
 
 (provide 'mbtb)
 ;;; mbtb.el ends here
