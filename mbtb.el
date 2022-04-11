@@ -63,6 +63,7 @@
   (custom-set-variables
    '(minibuffer-frame-alist     ; unspecified items from default-frame-alist
      `((minibuffer . only)
+       (keep-ratio '('width-only . nil))
        (minibuffer-exit . nil)
        (visibility . nil)
        (min-height . 1)
@@ -101,7 +102,7 @@
   (let ((mbf (mbtb-mbf owner)))
     (when mbf
       (mbtb-apply-owner-width owner mbf))))
-(add-hook 'window-size-change-functions #'mbtb-track-owner-width)
+;; (add-hook 'window-size-change-functions #'mbtb-track-owner-width)
 
 (defun mbtb-setup-colors-and-width (owner mbf)
   "Given OWNER and MBF, ensure proper MBF color, position and width."
