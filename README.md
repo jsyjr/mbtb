@@ -21,3 +21,9 @@ You also need to enable a vaccuous version of tab-bar-mode enable:
 
   (tab-bar-mode  +1)
 ```
+
+## Acknowledgement:
+
+An earlier version of this package was far more complicated, less
+performant and less robust.  Martin Rudalics repeatedly provided
+great feedback.  The result is this much simpler package.

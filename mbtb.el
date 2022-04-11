@@ -21,13 +21,13 @@
 ;;;
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+;;;
 ;;; Commentary:
 ;;;
 ;;; Mbtb is proof-of-concept for a minibuffer positioned over the menu-bar.
 ;;; It is implemented using a separate mini-buffer frame per primary frame.
 ;;;
-
+;;;
 ;;; Installation:
 ;;;
 ;;; To try this package your default-frame-alist needs these entries:
@@ -40,8 +40,12 @@
 ;;;    (setq tab-bar-format '((lambda () " ")))
 ;;;
 ;;;    (tab-bar-mode  +1)
-```
-
+;;;
+;;; Acknowledgement:
+;;;
+;;; An earlier version of this package was far more complicated, less
+;;; performant and less robust.  Martin Rudalics repeatedly provided
+;;; great feedback.  The result is this much simpler package.
 
 ;;; Code:
 
@@ -66,43 +70,42 @@
   "MBTB callback for the resize-mini-frames option."
   (fit-frame-to-buffer-1 mbf nil 1 nil nil 'vertically))
 
-(defun mbtb-mbf (owner)
-  "Qualify OWNER by returning its dedicated separate MBF or nil."
-  (let ((owner-minibuffer (frame-parameter owner 'minibuffer)))
+(defun mbtb-mbf (parent)
+  "Qualify PARENT by returning its dedicated separate MBF or nil."
+  (let ((parent-minibuffer (frame-parameter parent 'minibuffer)))
     (cond
-     ((not owner-minibuffer)
+     ((not parent-minibuffer)
       nil)
-     ((eq owner-minibuffer 'only)
-      nil)                      ; OWNER is actually a separate MBF
+     ((eq parent-minibuffer 'only)
+      nil)                      ; PARENT is actually a separate MBF
      (t
-      (let ((mbf (window-frame owner-minibuffer)))
+      (let ((mbf (window-frame parent-minibuffer)))
 	(if (eq (frame-parameter mbf 'minibuffer) 'only)
 	    mbf
 	  nil))))))
 
-(defun mbtb-apply-owner-width (owner mbf)
-  "Apply qualified OWNER's width to separate MBF."
-  (when (frame-size-changed-p owner)
-    (let ((width (frame-parameter owner 'width)))
+(defun mbtb-apply-parent-width (parent mbf)
+  "Apply qualified PARENT's width to separate MBF."
+  (when (frame-size-changed-p parent)
+    (let ((width (frame-parameter parent 'width)))
       (unless (eq (frame-parameter mbf 'width) width)
 	(set-frame-parameter mbf 'width  width)))))
 
 (defun mbtb-setup-minibuffer ()
-  "Invoke mbtb-apply-owner-width with owner and mbf."
-  (let ((owner (window-frame (minibuffer-selected-window))))
-    (mbtb-apply-owner-width owner (mbtb-mbf owner))))
+  "Invoke mbtb-apply-parent-width with parent and mbf."
+  (let ((parent (window-frame (minibuffer-selected-window))))
+    (mbtb-apply-parent-width parent (mbtb-mbf parent))))
 (add-hook 'minibuffer-setup-hook #'mbtb-setup-minibuffer)
 
-(defun mbtb-after-make-frame (owner)
+(defun mbtb-after-make-frame (parent)
   "Final steps in creating an MBTB minibuffer frame."
-  (let ((mbf (mbtb-mbf owner)))
+  (let ((mbf (mbtb-mbf parent)))
     (when mbf
-      (set-frame-parameter mbf 'parent-frame owner)
-      (set-frame-position mbf 0 0)
-      (mbtb-resize-mbf mbf)
-      (mbtb-apply-owner-width owner mbf)
       (set-face-background 'fringe          "black" mbf)
       (set-face-background 'internal-border "white" mbf)
+      (set-frame-position mbf 0 0)
+      (set-frame-parameter mbf 'parent-frame parent)
+      (mbtb-apply-parent-width parent mbf)
       (set-frame-parameter mbf 'visibility t))))
 (add-hook 'after-make-frame-functions #'mbtb-after-make-frame)
 
