@@ -60,7 +60,7 @@
        (menu-bar-lines . 0)
        (tool-bar-lines . 0)
        (tab-bar-lines . 0)
-       (internal-border-width . 1)
+       (child-frame-border-width . 1)
        (skip-taskbar . t)
        (undecorated . t)
        (desktop-dont-save . t)))
@@ -101,8 +101,8 @@
   "Final steps in creating an MBTB minibuffer frame."
   (let ((mbf (mbtb-mbf parent)))
     (when mbf
-      (set-face-background 'fringe          "black" mbf)
-      (set-face-background 'internal-border "white" mbf)
+      (set-face-background 'fringe "black" mbf)
+      (set-face-background 'child-frame-border "white" mbf)
       (set-frame-position mbf 0 0)
       (set-frame-parameter mbf 'parent-frame parent)
       (mbtb-apply-parent-width parent mbf)
