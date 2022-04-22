@@ -106,7 +106,8 @@
       (set-frame-position mbf 0 0)
       (set-frame-parameter mbf 'parent-frame parent)
       (mbtb-apply-parent-width parent mbf)
-      (set-frame-parameter mbf 'visibility t))))
+      (set-frame-parameter mbf 'visibility t)
+      (setq default-minibuffer-frame nil))))
 (add-hook 'after-make-frame-functions #'mbtb-after-make-frame)
 
 (provide 'mbtb)
