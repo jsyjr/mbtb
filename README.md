@@ -22,6 +22,8 @@ You also need to enable a vaccuous version of tab-bar-mode enable:
   (tab-bar-mode  +1)
 ```
 
+If you load via use-package do not defer loading (i.e. :demand t).
+
 ## Acknowledgement:
 
 An earlier version of this package was far more complicated, less
