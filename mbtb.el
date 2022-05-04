@@ -49,23 +49,6 @@
 
 ;;; Code:
 
-(with-eval-after-load 'mbtb     ; configure emacs options
-  (custom-set-variables
-   '(minibuffer-frame-alist     ; unspecified items from default-frame-alist
-     `((minibuffer . only)
-       (keep-ratio '('width-only . nil))
-       (minibuffer-exit . nil)
-       (visibility . nil)
-       (min-height . 1)
-       (menu-bar-lines . 0)
-       (tool-bar-lines . 0)
-       (tab-bar-lines . 0)
-       (child-frame-border-width . 1)
-       (skip-taskbar . t)
-       (undecorated . t)
-       (desktop-dont-save . t)))
-   '(resize-mini-frames #'mbtb-resize-mbf)))
-
 (defun mbtb-resize-mbf (mbf)
   "MBTB callback for the resize-mini-frames option."
   (fit-frame-to-buffer-1 mbf nil 1 nil nil 'vertically))
@@ -107,8 +90,26 @@
       (set-frame-parameter mbf 'parent-frame parent)
       (mbtb-apply-parent-width parent mbf)
       (set-frame-parameter mbf 'visibility t)
-      (setq default-minibuffer-frame nil))))
-(add-hook 'after-make-frame-functions #'mbtb-after-make-frame)
+      (setq default-minibuffer-frame )
+      )))
+
+(with-eval-after-load 'mbtb     ; configure emacs options
+  (custom-set-variables
+   '(minibuffer-frame-alist     ; unspecified items from default-frame-alist
+     `((minibuffer . only)
+       (keep-ratio '('width-only . nil))
+       (minibuffer-exit . nil)
+       (visibility . nil)
+       (min-height . 1)
+       (menu-bar-lines . 0)
+       (tool-bar-lines . 0)
+       (tab-bar-lines . 0)
+       (child-frame-border-width . 1)
+       (skip-taskbar . t)
+       (undecorated . t)
+       (desktop-dont-save . t)))
+   '(resize-mini-frames #'mbtb-resize-mbf))
+  (add-hook 'after-make-frame-functions #'mbtb-after-make-frame))
 
 (provide 'mbtb)
 ;;; mbtb.el ends here
