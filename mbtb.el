@@ -90,7 +90,7 @@
       (set-frame-parameter mbf 'parent-frame parent)
       (mbtb-apply-parent-width parent mbf)
       (set-frame-parameter mbf 'visibility t)
-      (setq default-minibuffer-frame )
+      (setq default-minibuffer-frame mbf)
       )))
 
 (with-eval-after-load 'mbtb     ; configure emacs options
